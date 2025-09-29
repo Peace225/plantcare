@@ -5,13 +5,20 @@ import {
   register,
   loginWithGoogle,
   loginWithFacebook,
-  // redirectWithGoogle, redirectWithFacebook // (option iOS/Safari)
+  // redirectWithGoogle, redirectWithFacebook // (option iOS/Safari si popup bloquées)
 } from "../lib/firebase.js"
 import { FcGoogle } from "react-icons/fc"
 import { FaFacebook } from "react-icons/fa"
 import { GiCactus } from "react-icons/gi"
 import { motion } from "framer-motion"
 
+/**
+ * Page d'authentification
+ * - Connexion / Création de compte par email
+ * - OAuth Google / Facebook
+ * - Design cohérent avec la charte (emerald/teal)
+ * - Accessibilité + UX (désactivation lors du chargement, erreurs humanisées)
+ */
 export default function AuthPage() {
   const [mode, setMode] = useState("login") // 'login' | 'signup'
   const [email, setEmail] = useState("")
@@ -19,13 +26,16 @@ export default function AuthPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
+  // Soumission email/mot de passe
   async function onSubmit(e) {
     e.preventDefault()
+    if (loading) return // évite double submit
     try {
       setError(null)
       setLoading(true)
-      if (mode === "login") await login(email, password)
-      else await register(email, password)
+      const mail = email.trim()
+      if (mode === "login") await login(mail, password)
+      else await register(mail, password)
       window.location.href = "/" // redirige vers Dashboard
     } catch (err) {
       setError(humanizeAuthError(err?.message || "Erreur inconnue"))
@@ -34,14 +44,15 @@ export default function AuthPage() {
     }
   }
 
+  // Connexion Google
   async function onGoogle() {
+    if (loading) return
     try {
       setError(null)
       setLoading(true)
       await loginWithGoogle()
       window.location.href = "/"
-      // Pour iOS/Safari si popup bloquée :
-      // await redirectWithGoogle()
+      // iOS/Safari : await redirectWithGoogle()
     } catch (err) {
       setError(humanizeAuthError(err?.message || "Erreur Google"))
     } finally {
@@ -49,14 +60,15 @@ export default function AuthPage() {
     }
   }
 
+  // Connexion Facebook
   async function onFacebook() {
+    if (loading) return
     try {
       setError(null)
       setLoading(true)
       await loginWithFacebook()
       window.location.href = "/"
-      // Pour iOS/Safari :
-      // await redirectWithFacebook()
+      // iOS/Safari : await redirectWithFacebook()
     } catch (err) {
       setError(humanizeAuthError(err?.message || "Erreur Facebook"))
     } finally {
@@ -74,21 +86,20 @@ export default function AuthPage() {
       "
     >
       <div className="w-full max-w-md">
-        {/* Logo + Nom au centre */}
+        {/* Branding (logo + nom + baseline) */}
         <div className="text-center mb-6">
           <div className="inline-flex items-center justify-center gap-2">
             <span className="rounded-2xl bg-emerald-100 p-2 text-emerald-700 shadow-sm">
-              <GiCactus className="w-7 h-7" />
+              <GiCactus className="w-7 h-7" aria-hidden="true" />
             </span>
             <span className="text-2xl font-extrabold text-emerald-800 tracking-tight">
               PlantCare
             </span>
           </div>
-          <p className="mt-2 text-gray-600 text-sm">
-            Gérez vos plantes d’intérieur en toute simplicité 🌿 
-            
+          <p className="mt-2 text-gray-700 text-sm leading-relaxed">
+            Gérez vos plantes d’intérieur en toute simplicité 🌿<br />
+            Ajoutez-les, suivez leurs besoins en eau et recevez des rappels d’arrosage.
           </p>
-         
         </div>
 
         {/* Carte Auth */}
@@ -98,13 +109,17 @@ export default function AuthPage() {
           transition={{ duration: 0.25 }}
           className="bg-white/95 backdrop-blur rounded-2xl border border-emerald-100 shadow-sm p-5 sm:p-6"
         >
-          <h1 className="text-xl sm:text-2xl font-bold mb-4 text-emerald-900 text-center">
+          <h1
+            className="text-xl sm:text-2xl font-bold mb-4 text-emerald-900 text-center"
+            aria-live="polite"
+          >
             {mode === "login" ? "Connexion" : "Créer un compte"}
           </h1>
 
           {/* Boutons sociaux */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
             <button
+              type="button"
               onClick={onGoogle}
               disabled={loading}
               className="
@@ -112,11 +127,13 @@ export default function AuthPage() {
                 border-emerald-200 px-3 py-2 hover:bg-emerald-50
                 disabled:opacity-60 transition
               "
+              aria-label="Continuer avec Google"
             >
               <FcGoogle size={20} /> Google
             </button>
 
             <button
+              type="button"
               onClick={onFacebook}
               disabled={loading}
               className="
@@ -124,23 +141,27 @@ export default function AuthPage() {
                 bg-blue-600 text-white px-3 py-2 hover:bg-blue-700
                 disabled:opacity-60 transition
               "
+              aria-label="Continuer avec Facebook"
             >
               <FaFacebook size={20} /> Facebook
             </button>
           </div>
 
           {/* Séparateur */}
-          <div className="flex items-center my-4">
+          <div className="flex items-center my-4" role="separator" aria-hidden="true">
             <div className="flex-1 h-px bg-emerald-100" />
             <span className="px-3 text-gray-500 text-sm">ou</span>
             <div className="flex-1 h-px bg-emerald-100" />
           </div>
 
           {/* Formulaire email/mot de passe */}
-          <form onSubmit={onSubmit} className="space-y-3">
+          <form onSubmit={onSubmit} className="space-y-3" noValidate>
             <div>
-              <label className="block text-sm text-emerald-900 mb-1">Email</label>
+              <label htmlFor="email" className="block text-sm text-emerald-900 mb-1">
+                Email
+              </label>
               <input
+                id="email"
                 className="
                   w-full rounded-xl border px-3 py-2
                   border-emerald-200 bg-white
@@ -152,12 +173,16 @@ export default function AuthPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 autoComplete="email"
                 required
+                inputMode="email"
               />
             </div>
 
             <div>
-              <label className="block text-sm text-emerald-900 mb-1">Mot de passe</label>
+              <label htmlFor="password" className="block text-sm text-emerald-900 mb-1">
+                Mot de passe
+              </label>
               <input
+                id="password"
                 className="
                   w-full rounded-xl border px-3 py-2
                   border-emerald-200 bg-white
@@ -169,15 +194,18 @@ export default function AuthPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete={mode === "login" ? "current-password" : "new-password"}
                 required
+                minLength={6}
               />
             </div>
 
+            {/* Erreur lisible */}
             {error && (
-              <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+              <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2" role="alert">
                 {error}
               </p>
             )}
 
+            {/* CTA principal */}
             <button
               type="submit"
               disabled={loading}
@@ -201,6 +229,7 @@ export default function AuthPage() {
               <>
                 Pas de compte ?{" "}
                 <button
+                  type="button"
                   className="underline text-emerald-700 hover:text-emerald-800"
                   onClick={() => setMode("signup")}
                   disabled={loading}
@@ -212,6 +241,7 @@ export default function AuthPage() {
               <>
                 Déjà inscrit ?{" "}
                 <button
+                  type="button"
                   className="underline text-emerald-700 hover:text-emerald-800"
                   onClick={() => setMode("login")}
                   disabled={loading}
@@ -221,11 +251,6 @@ export default function AuthPage() {
               </>
             )}
           </p>
-
-          {/* Astuce popup iOS/Safari
-          <p className="mt-2 text-xs text-gray-500 text-center">
-            Popups bloquées ? Utilisez la connexion par redirection dans le code.
-          </p> */}
         </motion.div>
 
         {/* Footer mini */}
@@ -237,7 +262,7 @@ export default function AuthPage() {
   )
 }
 
-/** Mappe quelques messages Firebase en messages lisibles */
+/** Mappe quelques messages Firebase en messages lisibles (UX) */
 function humanizeAuthError(msg) {
   if (!msg) return "Erreur"
   const lower = msg.toLowerCase()
