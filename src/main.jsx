@@ -19,12 +19,11 @@ ReactDOM.createRoot(document.getElementById("root")).render(
       <Routes>
         <Route element={<App />}>
           <Route path="auth" element={<AuthPage />} />
-
+          
           {/* Dashboard */}
           <Route index element={<Dashboard />} />
-          <Route path="plants" element={<Plants />} /> alias pour "Mes Plantes"
+          <Route path="plants" element={<Plants />} /> 
           <Route path="dev" element={<DevTools />} />
-          
 
           {/* CRUD */}
           <Route path="new" element={<PlantForm />} />

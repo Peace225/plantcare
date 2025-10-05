@@ -8,7 +8,7 @@ import { FiRefreshCw } from "react-icons/fi"
 export default function Dashboard() {
   const navigate = useNavigate()
 
-  // 📝 Astuce images : place tes fichiers dans /public/plants/...
+  // Astuce images : place tes fichiers dans /public/plants/...
   // puis utilise imageUrl: "/plants/aloe.jpg" (sans /src et sans accent)
   const [plants, setPlants] = useState([
     {
@@ -19,7 +19,7 @@ export default function Dashboard() {
       waterAmountMl: 500,
       waterEveryDays: 3,
       nextWateringAt: new Date(Date.now() + 2 * 86400000).toISOString(),
-      imageUrl: "/plants/aloe.jpg",
+      imageUrl: "/src/assets/plants/aloe.jpg",
     },
     {
       id: 2,
@@ -29,7 +29,7 @@ export default function Dashboard() {
       waterAmountMl: 100,
       waterEveryDays: 14,
       nextWateringAt: new Date(Date.now() + 7 * 86400000).toISOString(),
-      imageUrl: "/plants/cactus.jpg",
+      imageUrl: "/src/assets/plants/cactus.jpg",
     },
     {
       id: 3,
@@ -39,14 +39,14 @@ export default function Dashboard() {
       waterAmountMl: 200,
       waterEveryDays: 7,
       nextWateringAt: new Date(Date.now() + 86400000).toISOString(),
-      imageUrl: "/plants/orchidee.jpg", // <- évite les accents dans le nom du fichier
+      imageUrl: "/src/assets/plants/orchidée.jpg", // <- évite les accents dans le nom du fichier
     },
   ])
 
-  // 🔄 État de rafraîchissement pour spinner/disable
+  //  État de rafraîchissement pour spinner/disable
   const [isRefreshing, setIsRefreshing] = useState(false)
 
-  // 🔄 Actualiser (simulation : ping visuel + délai court)
+  //  Actualiser (simulation : ping visuel + délai court)
   const refreshPlants = async () => {
     if (isRefreshing) return
     setIsRefreshing(true)
@@ -56,7 +56,7 @@ export default function Dashboard() {
     setIsRefreshing(false)
   }
 
-  // 💧 Arroser -> nextWateringAt += waterEveryDays
+  //  Arroser -> nextWateringAt += waterEveryDays
   const handleWater = (id) => {
     setPlants(prev =>
       prev.map(p => {
@@ -73,18 +73,18 @@ export default function Dashboard() {
     )
   }
 
-  // ✏️ Modifier -> navigation vers le formulaire d’édition
+  //  Modifier -> navigation vers le formulaire d’édition
   const handleEdit = (id) => {
     navigate(`/edit/${id}`)
   }
 
-  // 🗑️ Supprimer -> confirmation + retrait local
+  //  Supprimer -> confirmation + retrait local
   const handleDelete = (id, name) => {
     if (!confirm(`Supprimer “${name || "Sans nom"}” ?`)) return
     setPlants(prev => prev.filter(p => p.id !== id))
   }
 
-  // 🎬 Animations
+  //  Animations
   const container = {
     hidden: { opacity: 0 },
     show: { opacity: 1, transition: { staggerChildren: 0.08, delayChildren: 0.05 } },

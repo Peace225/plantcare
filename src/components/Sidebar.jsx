@@ -164,11 +164,7 @@ function SidebarInner({ pathname, isDashboard, user, doLogout, onClose }) {
         initial="hidden"
         animate="visible"
       >
-        <motion.div variants={itemVariants}>
-          <div className="text-[13px] tracking-wide text-emerald-700/80 mb-1 px-1">
-            Navigation
-          </div>
-        </motion.div>
+        
 
         <NavItem to="/" active={isDashboard}>
           <FiHome className="shrink-0" /> <span>Dashboard</span>
